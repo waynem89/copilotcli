@@ -6,6 +6,9 @@
  * - Subtraction (-)
  * - Multiplication (*, x, X, ×)
  * - Division (/, ÷)
+ * - Modulo (%)
+ * - Exponentiation (^)
+ * - Square root (√)
  */
 
 const normalizeOperator = (operator) => {
@@ -15,6 +18,10 @@ const normalizeOperator = (operator) => {
 
   if (operator === "÷") {
     return "/";
+  }
+
+  if (operator === "sqrt") {
+    return "√";
   }
 
   return operator;
@@ -29,6 +36,19 @@ const divide = (left, right) => {
   }
   return left / right;
 };
+const modulo = (left, right) => {
+  if (right === 0) {
+    throw new Error("Modulo by zero is not allowed.");
+  }
+  return left % right;
+};
+const power = (left, right) => left ** right;
+const squareRoot = (value) => {
+  if (value < 0) {
+    throw new Error("Square root of a negative number is not allowed.");
+  }
+  return Math.sqrt(value);
+};
 
 const calculate = (left, operatorRaw, right) => {
   const operator = normalizeOperator(operatorRaw);
@@ -42,8 +62,14 @@ const calculate = (left, operatorRaw, right) => {
       return multiply(left, right);
     case "/":
       return divide(left, right);
+    case "%":
+      return modulo(left, right);
+    case "^":
+      return power(left, right);
+    case "√":
+      return squareRoot(left);
     default:
-      throw new Error("Unsupported operator. Use one of: +, -, *, /, x, X, ×, ÷");
+      throw new Error("Unsupported operator. Use one of: +, -, *, /, %, ^, √, x, X, ×, ÷, sqrt");
   }
 };
 
@@ -64,15 +90,25 @@ const runCli = (args = process.argv.slice(2)) => {
   }
 
   const normalizedOperator = normalizeOperator(operatorRaw);
-  const supportedOperators = ["+", "-", "*", "/"];
+  const supportedOperators = ["+", "-", "*", "/", "%", "^", "√"];
 
   if (!supportedOperators.includes(normalizedOperator)) {
-    console.error("Unsupported operator. Use one of: +, -, *, /, x, X, ×, ÷");
+    console.error("Unsupported operator. Use one of: +, -, *, /, %, ^, √, x, X, ×, ÷, sqrt");
     process.exit(1);
   }
 
   if (normalizedOperator === "/" && right === 0) {
     console.error("Division by zero is not allowed.");
+    process.exit(1);
+  }
+
+  if (normalizedOperator === "%" && right === 0) {
+    console.error("Modulo by zero is not allowed.");
+    process.exit(1);
+  }
+
+  if (normalizedOperator === "√" && left < 0) {
+    console.error("Square root of a negative number is not allowed.");
     process.exit(1);
   }
 
@@ -89,6 +125,9 @@ module.exports = {
   subtract,
   multiply,
   divide,
+  modulo,
+  power,
+  squareRoot,
   normalizeOperator,
   calculate,
   runCli,
